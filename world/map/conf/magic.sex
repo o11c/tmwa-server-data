@@ -336,7 +336,7 @@ SPELL lesser-heal (target : STRING) : "#lum" =
                     IF failed(pc(target))
                       THEN (IF ((target = "mouboo" || target = "Mouboo")
                                  && rdistance(location(caster), location(npc("Mouboo"))) < 2 + (spellpower / 100))
-                            THEN { mes "Your spell seems to have no effect on the mouboo."; close; }
+                            THEN (SCRIPT "{ mes \"Your spell seems to have no effect on the mouboo.\"; close; }")
                             ELSE target = caster;)
                       ELSE (target = pc(target);
                             IF is_dead(target)
@@ -586,10 +586,10 @@ SPELL lay-on-hands (target : STRING) : "#inma" =
                       THEN (IF ((target = "mouboo" || target = "Mouboo")
                                  && (rdistance(location(caster), location(npc("Mouboo"))) < 2 + (spellpower / 100)))
                             THEN (needed = 1000;
-                                  {
+                                  (SCRIPT "{
                                    set @spell, 1;
-                                   callfunc "QuestMoubooHeal";
-                                  })
+                                   callfunc \"QuestMoubooHeal\";
+                                  }"))
                             ELSE ABORT;
                             )
                       ELSE (target = pc(target);
@@ -774,10 +774,10 @@ LOCAL SPELL rain : "#kaflosh" =
                 area = rbox(location(caster), range);
                 IF (is_in(location(npc("#DruidTree0#_M")), area)
                     || is_in(location(npc("#DruidTree1#_M")), area))
-                THEN {
+                THEN (SCRIPT "{
                     set @flag, 1;
-                    callfunc "QuestTreeTrigger";
-                };
+                    callfunc \"QuestTreeTrigger\";
+                }");
                 FOR i = 0 TO (spellpower / 3) DO (
                     FOR j = 0 TO min(spellpower / 2, 200) / 100 DO (
                         location = random_location(area);
@@ -835,7 +835,7 @@ SPELL shear : "#chipchip" =
                          CALL shear-drop("Mauve", "MauvePlant",                 "MauveHerb", 700);
                          CALL shear-drop("SilkWorm", "Silkworm",                "SilkCocoon", 300);
                          IF ((name = "Fluffy" || name = "Mouboo") && random(2))
-                         THEN { set @value, 1; callfunc "QuestSagathaHappy"; };
+                         THEN (SCRIPT "{ set @value, 1; callfunc \"QuestSagathaHappy\"; }");
                     )
 
 
@@ -1237,20 +1237,20 @@ NONMAGIC SILENT SPELL marriage (target : PC) : "marry" =
               THEN (message(caster, "You must both be wearing your wedding rings!"); ABORT;)
 
               script_target = target;
-              {
-                announce @caster_name$ + " is asking " + strcharinfo(0) + " for marriage.", 2;
-                mes @caster_name$ + " wishes to marry you.";
-                mes "Do you accept?";
+              (SCRIPT "{
+                announce @caster_name$ + \" is asking \" + strcharinfo(0) + \" for marriage.\", 2;
+                mes @caster_name$ + \" wishes to marry you.\";
+                mes \"Do you accept?\";
                 next;
-                menu "Yes, I do!", L_yes,
-                     "No.", -;
+                menu \"Yes, I do!\", L_yes,
+                     \"No.\", -;
                 close;
 
                 L_yes:
                 if marriage(@caster_name$)
-                     announce @caster_name$ + " and " + strcharinfo(0) + " are now married!", 0;
+                     announce @caster_name$ + \" and \" + strcharinfo(0) + \" are now married!\", 0;
                 close;
-              }
+              }")
 
               IF not (is_married(caster))
               THEN message(caster, name_of(target) + " turned down your marriage offer.");
@@ -1325,25 +1325,25 @@ LOCAL SPELL mouboo-smell : "#s" =
 #NONMAGIC SILENT SPELL easter (type : STRING) : "#m" =
 #    (REQUIRE name_of(caster) == "Freeyorp") =>
 #        EFFECT IF (type == "EE_RF") THEN (
-#            {
-#                doevent("Old Woman::OnReplenish");
-#            }
+#            (SCRIPT "{
+#                doevent(\"Old Woman::OnReplenish\");
+#            }")
 #        ) ELSE IF (type == "EE_SUS") THEN (
-#            {
-#                doevent "Old Woman::OnManualStopTimer";
-#            }
+#            (SCRIPT "{
+#                doevent \"Old Woman::OnManualStopTimer\";
+#            }")
 #        ) ELSE IF (type == "EE_INIT") THEN (
-#            {
-#                doevent "Old Woman::OnManualStartTimer";
-#            }
+#            (SCRIPT "{
+#                doevent \"Old Woman::OnManualStartTimer\";
+#            }")
 #        ) ELSE IF (type == "BLOCKER_DISABLE") THEN (
-#            {
+#            (SCRIPT "{
 #                set $Easter_2010_Npc_State2, ($Easter_2010_Npc_State2 & ~(E10_BARRIER_MASK << E10_BARRIER_SHIFT)) | (E10_BARRIER_OPEN << E10_BARRIER_SHIFT);
-#            }
+#            }")
 #        ) ELSE IF (type == "BLOCKER_ENABLE") THEN (
-#            {
+#            (SCRIPT "{
 #                set $Easter_2010_Npc_State2, ($Easter_2010_Npc_State2 & ~(E10_BARRIER_MASK << E10_BARRIER_SHIFT)) | (E10_BARRIER_ACTIVE << E10_BARRIER_SHIFT);
-#            }
+#            }")
 #        ) ELSE message(caster, "Unknown action '" + type + "'!");
 
 # Invader spells
@@ -1351,23 +1351,25 @@ LOCAL SPELL mouboo-smell : "#s" =
 #NONMAGIC SILENT SPELL easter-invader-init : "#i" =
 #    (REQUIRE name_of(caster) == "Xakelbael the Dark") =>
 #      EFFECT warp(caster, @("028-1.gat", 139, 46));
-#             {
-#              gmcommand "@blvl -255";
-#              gmcommand "@blvl 199";
-#              gmcommand "@setmagic all 5 Xakelbael the Dark";
-#              gmcommand "@allstats";
-#              savepoint "028-1.gat", 130, 46;
-#             }
+#             (SCRIPT "{
+#              gmcommand \"@blvl -255\";
+#              gmcommand \"@blvl 199\";
+#              gmcommand \"@setmagic all 5 Xakelbael the Dark\";
+#              gmcommand \"@allstats\";
+#              savepoint \"028-1.gat\", 130, 46;
+#             }")
 #             create_item(caster, "DarkTalisman", 1);
 
 #NONMAGIC SILENT SPELL easter-invader-hide : "#h" =
 #    (REQUIRE name_of(caster) == "Xakelbael the Dark") =>
-#      EFFECT { if (checkoption(4096)) goto L_toggle;
+#      EFFECT (SCRIPT "{
+#               if (checkoption(4096)) goto L_toggle;
 #               setoption(4096);
 #               end;
 #               L_toggle:
 #               setoption(0);
-#               end; };
+#               end;
+#               }");
 #               warp(caster, location(caster));
 
 #NONMAGIC SILENT SPELL easter-invader-warp-taunt : "#o" =
@@ -1406,7 +1408,7 @@ LOCAL SPELL mouboo-smell : "#s" =
 #    (REQUIRE name_of(caster) == "Xakelbael the Dark") =>
 #      EFFECT FOREACH PC p IN rbox(location(caster), 50) DO IF (p <> caster)
 #             THEN ( script_target = p;
-#                    { gmcommand "@jump"; }
+#                    (SCRIPT "{ gmcommand \"@jump\"; }")
 #                    message(p, "A powerful force sends you flying!");
 #                  )
 #             warp(caster, @("028-1.gat", 130, 46));
@@ -1467,7 +1469,7 @@ LOCAL SPELL mouboo-smell : "#s" =
 #             ELSE IF (t == "s") THEN ( warp(caster, @("028-1.gat", 69, 96)); )
 #             ELSE IF (t == "c") THEN ( warp(caster, @("028-3.gat", 50, 58)); )
 #             ELSE IF (t == "t") THEN ( warp(caster, @("009-1.gat", 48, 35)); )
-#             ELSE { gmcommand "@jump"; };
+#             ELSE (SCRIPT "{ gmcommand \"@jump\"; }");
 
 #NONMAGIC SILENT SPELL easter-invader-taunt-local (s : STRING) : "#l" =
 #    (REQUIRE name_of(caster) == "Xakelbael the Dark") =>
@@ -1495,7 +1497,7 @@ NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
      => ((REQUIRE rdistance(location(caster), @("028-1.gat", 63, 67)) < 5) =>
                  EFFECT sfx(location(caster), SFX_TELEPORT, 200);
                         WAIT 8000;
-                        { savepoint "009-1", 52, 39; };
+                        (SCRIPT "{ savepoint \"009-1\", 52, 39; }");
                         warp(caster, @("009-1.gat", 55, 37));
                         sfx(location(caster), SFX_TELEPORT, 200);
          |
@@ -1508,7 +1510,7 @@ NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
                         ELSE WAIT 20000;
                         "Cancel teleport if the player took damage during channel time (hacky, but for most purposes should work.)"
                         IF (hp(caster) < inithp) THEN ABORT;
-                        { savepoint "028-1", 63, 68; };
+                        (SCRIPT "{ savepoint \"028-1\", 63, 68; }");
                         warp(caster, @("028-1.gat", 63, 67));
                         sfx(location(caster), SFX_TELEPORT, 200);
         )
@@ -1516,7 +1518,7 @@ NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
                 => EFFECT set_script_variable(caster, "Easter_2010_QuestState", script_int(caster, "Easter_2010_QuestState") | (1 << 17));
                           sfx(location(caster), SFX_TELEPORT, 200);
                           WAIT 8000;
-                          { savepoint "009-1", 52, 39; };
+                          (SCRIPT "{ savepoint \"009-1\", 52, 39; }");
                           warp(caster, @("009-1.gat", 55, 37));
                           sfx(location(caster), SFX_TELEPORT, 200);
        | (REQUIRE map_nr(location(caster)) != 28 && (script_int(caster, "Easter_2010_QuestState") >> 17) & 1 == 0)
@@ -1529,7 +1531,7 @@ NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
                    "Cancel teleport if the player took damage during channel time (hacky, but for most purposes should work.)"
                    IF (hp(caster) < inithp) THEN ABORT;
                    set_script_variable(caster, "Easter_2010_QuestState", script_int(caster, "Easter_2010_QuestState") | (1 << 17));
-                   { savepoint "028-1", 63, 68; };
+                   (SCRIPT "{ savepoint \"028-1\", 63, 68; }");
                    warp(caster, @("028-1.gat", 63, 67));
                    sfx(location(caster), SFX_TELEPORT, 200);
        )
@@ -1537,11 +1539,11 @@ NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
 
 #NONMAGIC SILENT SPELL easter-invader-killer : "#z" =
 #    (REQUIRE name_of(caster) == "Xakelbael the Dark") =>
-#    EFFECT { gmcommand "@killer"; }
+#    EFFECT (SCRIPT "{ gmcommand \"@killer\"; }")
 
 #NONMAGIC SILENT SPELL easter-invader-killable : "#x" =
 #    (REQUIRE name_of(caster) == "Xakelbael the Dark") =>
-#    EFFECT { gmcommand "@killable"; }
+#    EFFECT (SCRIPT "{ gmcommand \"@killable\"; }")
 
 #NONMAGIC SILENT SPELL easter-debug-reset (s : STRING) : "#r" =
 #    (REQUIRE name_of(caster) == "Freeyorp") =>
@@ -1552,36 +1554,38 @@ NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
 #    EFFECT IF (s == caster) THEN ABORT;
 #           IF ((script_int(s, "Easter_2010_QuestState") >> 16) & 1) THEN ( message(caster, s + " already has the flag set!"); ABORT; )
 #           script_target = s;
-#           {    set Easter_2010_QuestState, Easter_2010_QuestState | (1 << 16); // RETURN_READY flag
-#                mes "As the smoke clears, you feel stronger, vivified.";
+#           (SCRIPT "{
+#                set Easter_2010_QuestState, Easter_2010_QuestState | (1 << 16); // RETURN_READY flag
+#                mes \"As the smoke clears, you feel stronger, vivified.\";
 #                next;
-#                mes "The world seems more vibrant. It looks the same as ever, but you get a sense of something more.";
+#                mes \"The world seems more vibrant. It looks the same as ever, but you get a sense of something more.\";
 #                next;
-#                mes "You feel something familiar.";
+#                mes \"You feel something familiar.\";
 #                next;
-#                mes "This sensation... could it be home?";
+#                mes \"This sensation... could it be home?\";
 #                next;
-#                mes "A single word comes to your mind - " + getspellinvocation("world-shift") + ". While it sounds magical, you know with certainty that you will not need any magical power to use it.";
+#                mes \"A single word comes to your mind - \" + getspellinvocation(\"world-shift\") + \". While it sounds magical, you know with certainty that you will not need any magical power to use it.\";
 #                next;
-#                mes "Could this be the way to move to and from the worlds? Either way, the dark petal the rose vanished into seems to be the key.";
+#                mes \"Could this be the way to move to and from the worlds? Either way, the dark petal the rose vanished into seems to be the key.\";
 #                next;
-#                mes "Though you might be able to succeed in one trip without it, returning home.";
+#                mes \"Though you might be able to succeed in one trip without it, returning home.\";
 #                if ((Easter_2010_QuestState >> E10_STATE_ROSE_SHIFT) & E10_STATE_ROSE_MASK == E10_STATE_ROSE_ROSE_COMPLETE) close;
 #                next;
-#                mes "But the world is still not quite right. Perhaps there is someone you should help before the world releases its hold on you?";
+#                mes \"But the world is still not quite right. Perhaps there is someone you should help before the world releases its hold on you?\";
 #                close;
-#           }
+#           }")
 
 NONMAGIC SILENT SPELL easter-get-debug (p : PC) : "#e" =
     (REQUIRE name_of(caster) == "Freeyorp" || name_of(caster) == "Xakelbael the Dark") =>
-    EFFECT { message strcharinfo(0), "Global state egg1: " + $Easter_2010_Egg_Loc_State1;
-             message strcharinfo(0), "Global state egg2: " + $Easter_2010_Egg_Loc_State2;
-             message strcharinfo(0), "Global state egg3: " + $Easter_2010_Egg_Loc_State3;
-             message strcharinfo(0), "Global state egg4: " + $Easter_2010_Egg_Loc_State4;
-             message strcharinfo(0), "Global state egg5: " + $Easter_2010_Egg_Loc_State5;
-             message strcharinfo(0), "Global npc state1: " + $Easter_2010_Npc_State1;
-             message strcharinfo(0), "Global npc state2: " + $Easter_2010_Npc_State2;
-           };
+    EFFECT (SCRIPT "{
+             message strcharinfo(0), \"Global state egg1: \" + $Easter_2010_Egg_Loc_State1;
+             message strcharinfo(0), \"Global state egg2: \" + $Easter_2010_Egg_Loc_State2;
+             message strcharinfo(0), \"Global state egg3: \" + $Easter_2010_Egg_Loc_State3;
+             message strcharinfo(0), \"Global state egg4: \" + $Easter_2010_Egg_Loc_State4;
+             message strcharinfo(0), \"Global state egg5: \" + $Easter_2010_Egg_Loc_State5;
+             message strcharinfo(0), \"Global npc state1: \" + $Easter_2010_Npc_State1;
+             message strcharinfo(0), \"Global npc state2: \" + $Easter_2010_Npc_State2;
+           }");
            message(caster, "Local state egg1: " + script_int(p, "Easter_2010_EggState1"));
            message(caster, "Local state egg2: " + script_int(p, "Easter_2010_EggState2"));
            message(caster, "Local state egg3: " + script_int(p, "Easter_2010_EggState3"));
@@ -1598,10 +1602,10 @@ PROCEDURE hug_tree(target) =
               || target = "Tree" || target = "Tree*"
               || target = "druid" || target = "druid*"
               || target = "Druid" || target = "Druid*")
-          THEN {
+          THEN (SCRIPT "{
                     set @flag, 2;
-                    callfunc "QuestTreeTrigger";
-                };
+                    callfunc \"QuestTreeTrigger\";
+                }");
 
 NONMAGIC SPELL hug0 (target : STRING) : "hug" = REQUIRE ((rdistance(location(caster), location(npc("#DruidTree0#_M"))) <= 1
                                                          || rdistance(location(caster), location(npc("#DruidTree1#_M"))) <= 1))
