@@ -1,54 +1,56 @@
-# Special-purpose globals
+"Special-purpose globals"
 obscure_chance = 95
 min_casttime = 200
 
-# Schools of magic
-CONST MAGIC	= 340
-CONST LIFE	= 341
-CONST WAR 	= 342
-CONST TRANSMUTE	= 343
-CONST NATURE	= 344
-CONST ASTRAL	= 345
+"Schools of magic"
+CONST MAGIC     = 340
+CONST LIFE      = 341
+CONST WAR       = 342
+CONST TRANSMUTE = 343
+CONST NATURE    = 344
+CONST ASTRAL    = 345
 
-# Elements
-CONST ELT_NEUTRAL	= 0
-CONST ELT_WATER		= 1
-CONST ELT_EARTH		= 2
-CONST ELT_FIRE		= 3
-CONST ELT_WIND		= 4
-CONST ELT_POISON	= 5
-CONST ELT_SHADOW	= 6
-CONST ELT_HOLY		= 7
-CONST ELT_GHOST		= 8
-CONST ELT_UNDEAD	= 9
+"Elements"
+CONST ELT_NEUTRAL       = 0
+CONST ELT_WATER         = 1
+CONST ELT_EARTH         = 2
+CONST ELT_FIRE          = 3
+CONST ELT_WIND          = 4
+CONST ELT_POISON        = 5
+CONST ELT_SHADOW        = 6
+CONST ELT_HOLY          = 7
+CONST ELT_GHOST         = 8
+CONST ELT_UNDEAD        = 9
 
-# Status effects
-CONST SC_POISON			= 132
-CONST SC_SHEARED		= 194 # This is the same as SC_HIDE, since mobs can't hide and shearing is only used for mobs.  Feel free to fix!
-CONST SC_HIDE			= 194
-CONST SC_HALT_REGENERATE	= 195
-CONST SC_FLYING_BACKPACK	= 196
-CONST SC_MBARRIER		= 197
-CONST SC_HASTE			= 198
-CONST SC_PHYS_SHIELD		= 199
+"Status effects"
+CONST SC_POISON                 = 132
+"This is the same as SC_HIDE, since mobs can't hide and shearing is only used for mobs.  Feel free to fix!"
+CONST SC_SHEARED                = 194
+CONST SC_HIDE                   = 194
+CONST SC_HALT_REGENERATE        = 195
+CONST SC_FLYING_BACKPACK        = 196
+CONST SC_MBARRIER               = 197
+CONST SC_HASTE                  = 198
+CONST SC_PHYS_SHIELD            = 199
 
-CONST SO_GMINVISIBLE		= 4096
+CONST SO_GMINVISIBLE            = 4096
 
-# Special effects
-CONST SFX_DEFAULT	= 10
-CONST SFX_SUMMON_START	= 21
-CONST SFX_SUMMON_FIRE	= 22
-CONST SFX_TELEPORT	= 24
-CONST SFX_RAIN		= 25
-CONST SFX_HIT		= 25
-CONST SFX_ARROW_HAIL	= 27
-CONST SFX_BARRIER	= 10
-CONST SFX_UNBARRIER	= 10
-CONST SFX_HEAL		= 3
+"Special effects"
+CONST SFX_DEFAULT       = 10
+CONST SFX_SUMMON_START  = 21
+CONST SFX_SUMMON_FIRE   = 22
+CONST SFX_TELEPORT      = 24
+CONST SFX_RAIN          = 25
+CONST SFX_HIT           = 25
+CONST SFX_ARROW_HAIL    = 27
+CONST SFX_BARRIER       = 10
+CONST SFX_UNBARRIER     = 10
+CONST SFX_HEAL          = 3
 
 CONST MAX_RAIN_SPELL_RADIUS = 15
 
-CONST MAX_MAGIC_LEVEL = 2 # Increase up to 5 as each new magic level is completed.
+ "Increase up to 5 as each new magic level is completed."
+CONST MAX_MAGIC_LEVEL = 2
 
 CONST MAGIC_FLAGS = "MAGIC_FLAGS"
 CONST MFLAG_MADE_CONC_POTION = 16384
@@ -63,10 +65,10 @@ CONST SCRIPT_HEALSPELL_MASK  = 0xff
 CONST SCRIPT_HEALSPELL_SHIFT = 24
 CONST DEBUG = 0
 
-CONST ATTACK_ICON_GENERIC	= 2000
-CONST ATTACK_ICON_SHEARING	= 2001
+CONST ATTACK_ICON_GENERIC       = 2000
+CONST ATTACK_ICON_SHEARING      = 2001
 
-# Default sfx on caster
+"Default sfx on caster"
 PROCEDURE default_effect() =
           sfx(caster, school - MAGIC + 2, 0);
 
@@ -76,10 +78,11 @@ PROCEDURE sfx_generic(target) =
 PROCEDURE set_var(name, mask, shift, value) =
           set_script_variable(caster, name, script_int(caster, name) & (neg (mask << shift)) | ((value & mask) << shift));
 
-PROCEDURE gain_heal_xp(value, # How many HP we healed
-                       gain,  # how many life magic experience points we can potentially gain
-                       heal_xp_value_divisor,  # 1 for instaheal, 2 for slow heal
-                       base_exp_factor) =      # factor for how many base experience points (max) the player should be allowed to gain
+"value:                 How many HP we healed"
+"gain:                  how many life magic experience points we can potentially gain"
+"heal_xp_value_divisor: 1 for instaheal, 2 for slow heal"
+"base_exp_factor:       factor for how many base experience points (max) the player should be allowed to gain"
+PROCEDURE gain_heal_xp(value, gain, heal_xp_value_divisor, base_exp_factor) =
           last_heal_xp = (script_int(caster, SCRIPT_XP) >> SCRIPT_HEALSPELL_SHIFT) & SCRIPT_HEALSPELL_MASK;
           IF (target <> caster
               && (value / heal_xp_value_divisor) > (10 + last_heal_xp + random(last_heal_xp + 1) + random(last_heal_xp + 1)))
@@ -93,13 +96,15 @@ PROCEDURE gain_heal_xp(value, # How many HP we healed
           THEN gain_experience(caster, base_exp_factor * extract_healer_experience(target, value), 0, 1);
 
 PROCEDURE gain_xp(gain) =
-          IF (level + 3 > skill(caster, MAGIC)) # Level 4 and 5 magic users don't gain anything from spell levels 0 resp. 0+1
+          "Level 4 and 5 magic users don't gain anything from spell levels 0 resp. 0+1"
+          IF (level + 3 > skill(caster, MAGIC))
           THEN (
                 index = spell_index(self_spell);
                 last_index = (script_int(caster, SCRIPT_XP) >> SCRIPT_LASTSPELL_SHIFT) & SCRIPT_LASTSPELL_MASK;
                 last_xp = (script_int(caster, SCRIPT_XP) >> SCRIPT_XP_SHIFT) & SCRIPT_XP_MASK;
                 IF (index != last_index)
-                THEN ( # Some variation observed
+                THEN (
+                     "Some variation observed"
                      xp = last_xp + gain;
                      IF (xp > SCRIPT_XP_MASK)
                      THEN xp = SCRIPT_XP_MASK;
@@ -136,11 +141,11 @@ PROCEDURE create_item(good_item, count, bad_item, difficulty) =
              )
           )
 
-# Increase spellpower by school and general magic skill
+"Increase spellpower by school and general magic skill"
 PROCEDURE adjust_spellpower(school) =
           experience = (script_int(caster, SCRIPT_XP) >> SCRIPT_XP_SHIFT) & SCRIPT_XP_MASK;
           spellpower = spellpower + (skill(caster, MAGIC) + skill(caster, school)) * 10;
-          # Below, we adjust by special items
+          "Below, we adjust by special items"
           IF (not(failed(target)) && (school = LIFE || school = NATURE))
           THEN IF (target)
           THEN IF (pc(target) = partner(caster))
@@ -158,21 +163,21 @@ PROCEDURE heal(target, max_heal) =
           power = min(max_heal, (max_heal * power) / 250);
           itemheal(target, power, 0);
 
-# Goes through instaheal instead of itemheal
+"Goes through instaheal instead of itemheal"
 PROCEDURE quickheal(target, power) =
           CALL default_effect();
           IF caster <> target
           THEN sfx(target, SFX_HEAL, 0);
           instaheal(target, power, 0);
 
-# Can attack the target? Imports attack_range from dynamic environment
+"Can attack the target? Imports attack_range from dynamic environment"
 PROCEDURE attack_check(target) =
           IF (not (line_of_sight(location(caster), location(target))))
             THEN ABORT;
           IF (not (rdistance(location(caster), location(target)) <= attack_range))
             THEN ABORT;
 
-# Cause elemental damage.  bonus_elt grants an attack bonus, malus_elt reduces the attack. `effect' is the sfx ID.
+"Cause elemental damage.  bonus_elt grants an attack bonus, malus_elt reduces the attack. `effect' is the sfx ID."
 PROCEDURE elt_damage(target, damage, dmgplus, bonus_elt, malus_elt, effect) =
           d = damage + random(dmgplus);
           IF (element(target) = malus_elt)
@@ -206,21 +211,25 @@ PROCEDURE summon_spell(mob_id, count, delay, lifetime, control_level) =
           sfx(location, SFX_SUMMON_START, 0);
           WAIT delay;
           sfx(location, SFX_SUMMON_FIRE, 0);
+          "pets when level is high enough"
           spawn(rbox(location, 2), caster, mob_id,
-                if_then_else(skill(caster, ASTRAL) >= control_level, 2, 1), # pets when level is high enough
+                if_then_else(skill(caster, ASTRAL) >= control_level, 2, 1),
                 count, lifetime);
 
 PROCEDURE abort_on_area_shield(pos) =
-	  IF (is_exterior(pos) = 1 && (map_nr(pos) = 1 # Tulimshar
-                                     ||map_nr(pos) = 9 # Hurnscald
-                                     ||map_nr(pos) = 20)) # Nivalis
-	  THEN (message(caster, "A powerful magic drains your spell just as it is beginning to take shape!");
+          "1: Tulimshar"
+          "9: Hurnscald"
+          "20: Nivalis"
+          IF (is_exterior(pos) = 1 && (map_nr(pos) = 1
+                                     ||map_nr(pos) = 9
+                                     ||map_nr(pos) = 20))
+          THEN (message(caster, "A powerful magic drains your spell just as it is beginning to take shape!");
                 ABORT;)
 
 
-#--------------------------------------------------------------------------------
-# Level 0 spells
-#--------------------------------------------------------------------------------
+"--------------------------------------------------------------------------------"
+"Level 0 spells"
+"--------------------------------------------------------------------------------"
 
 SPELL ask-magic-exp : "#abizit" =
       LET level = 0
@@ -234,7 +243,7 @@ SPELL ask-magic-exp : "#abizit" =
                 IF (experience == SCRIPT_XP_MASK && level > 4)
                 THEN message (caster, "You are as proficient at magic as you can possibly be.");
                 ELSE (
-                    # This duplicates the table in mana-seed.txt
+                    "This duplicates the table in mana-seed.txt"
                     IF level > 4
                     THEN max_experience = SCRIPT_XP_MASK;
                     ELSE IF level = 4
@@ -245,7 +254,8 @@ SPELL ask-magic-exp : "#abizit" =
                     THEN max_experience = 1200;
                     ELSE max_experience = 100;
 
-                    ratio = (10 * experience - random(max_experience / 30)) / max_experience; #Randomness:  jitter a bit at the transitions to give more precise information if used frequently
+                    "Randomness:  jitter a bit at the transitions to give more precise information if used frequently"
+                    ratio = (10 * experience - random(max_experience / 30)) / max_experience;
 
                     IF ratio >= 45
                     THEN message(caster, "Magic flows naturally from you, readily and with ease. Your understanding of what you can currently control at present is flawless, far beyond your requirements to cast magic at this level." + if_then_else(level >= MAX_MAGIC_LEVEL,""," Surely the Mana Seed will more than readily offer more magic for such a proficient user."));
@@ -331,7 +341,8 @@ SPELL lesser-heal (target : STRING) : "#lum" =
                       ELSE (target = pc(target);
                             IF is_dead(target)
                             THEN ABORT;)
-                    CALL gain_heal_xp(min(200, max_hp(target) - hp(target)), 1, 2, 2); # report half values for non-instaheal
+                    "report half values for non-instaheal"
+                    CALL gain_heal_xp(min(200, max_hp(target) - hp(target)), 1, 2, 2);
                     CALL heal(target, 200);
                     CALL gain_xp(1);
 
@@ -382,7 +393,7 @@ SPELL aggravate : "#itenplz" =
                     CALL default_effect();
                     FOREACH MOB target IN rbox(location(caster), 2 + spellpower / 50) DO
                             IF line_of_sight(location(caster), location(target))
-			    THEN (CALL sfx_generic(target);
+                            THEN (CALL sfx_generic(target);
                                   aggravate(target, 0, caster);)
 
 SPELL grow-mauve : "#modrilax" =
@@ -459,9 +470,9 @@ SPELL detect-magic : "#miteyo" =
                    THEN sfx(s, SFX_DEFAULT, 0);
 
 
-#--------------------------------------------------------------------------------
-# Level 1 spells
-#--------------------------------------------------------------------------------
+"--------------------------------------------------------------------------------"
+"Level 1 spells"
+"--------------------------------------------------------------------------------"
 
 SPELL make-arrows : "#kularzufrill" =
       LET level = 1
@@ -570,7 +581,7 @@ SPELL lay-on-hands (target : STRING) : "#inma" =
                                 && not (running_status_update(pc(target), SC_HALT_REGENERATE))
                               ))
           => EFFECT CALL adjust_spellpower(school);
-		    IF (not (target)) THEN ABORT;
+                    IF (not (target)) THEN ABORT;
                     IF failed(pc(target))
                       THEN (IF ((target = "mouboo" || target = "Mouboo")
                                  && (rdistance(location(caster), location(npc("Mouboo"))) < 2 + (spellpower / 100)))
@@ -584,7 +595,8 @@ SPELL lay-on-hands (target : STRING) : "#inma" =
                       ELSE (target = pc(target);
                             needed = max_hp(target) - hp(target);)
 
-                    pay_fraction = max(80, 200 - (vit(caster) + (spellpower / 10))); # Pay at least 40%
+                    "Pay at least 40%"
+                    pay_fraction = max(80, 200 - (vit(caster) + (spellpower / 10)));
                     payment = (needed * pay_fraction) / 200;
                     available = hp(caster) - (max_hp(caster) / 20);
 
@@ -624,7 +636,8 @@ SPELL lightning-strike : "#ingrav" =
                                   THEN in_rain = in_rain | 2;
                                );
                        IF in_rain & 1
-                       THEN (# caster standing in the rain?  This is going to be fun.
+                       THEN (
+                            "caster standing in the rain?  This is going to be fun."
                             used = 0;
                             FOREACH TARGET t IN area DO
                                   IF (random(200) + luk(caster) > 175)
@@ -666,7 +679,7 @@ LOCAL SPELL arrow-hail : "#frillyar" =
                         sfx(location, SFX_ARROW_HAIL, 0);
                         done = 0;
                         FOREACH TARGET target IN rbox(location, 0) DO (
-                      	        injure(caster, target, damage + random(damage_bonus) + random(damage_bonus), 0);
+                                injure(caster, target, damage + random(damage_bonus) + random(damage_bonus), 0);
                                 done = 1;
                                 BREAK;
                         )
@@ -804,21 +817,23 @@ SPELL shear : "#chipchip" =
                 CALL default_effect();
                 override_attack (caster, 1, 2000, 1, ATTACK_ICON_SHEARING, 30, 0);
          ATTRIGGER IF not(is_pc(target))
-                   THEN (score = random (1000 - (random (spellpower))); # lower score -> more valuable item
+                   "lower score -> more valuable item"
+                   THEN (score = random (1000 - (random (spellpower)));
                          name = name_of(target);
                          place = random_location(rbox(location(target), 1));
                          IF running_status_update(target, SC_SHEARED)
                          THEN ABORT;
-                         status_change(target, SC_SHEARED, 1, 1, 1, 1, 600000); # 10 minutes
-                         CALL shear-drop("Fluffy", "Fluffy",			"WhiteFur", 300);
-                         CALL shear-drop("EasterFluffy", "Easter Fluffy",	"WhiteFur", 300);
-                         CALL shear-drop("SpikyMushroom", "Spiky Mushroom",	"HardSpike", 250);
-                         CALL shear-drop("Mouboo", "Mouboo",			"CottonCloth", 175);
-                         CALL shear-drop("Cobalt", "CobaltPlant",		"CobaltHerb", 700);
-                         CALL shear-drop("Alizarin", "AlizarinPlant",		"AlizarinHerb", 700);
-                         CALL shear-drop("Gamboge", "GambogePlant",		"GambogeHerb", 700);
-                         CALL shear-drop("Mauve", "MauvePlant",			"MauveHerb", 700);
-                         CALL shear-drop("SilkWorm", "Silkworm",		"SilkCocoon", 300);
+                         "10 minutes"
+                         status_change(target, SC_SHEARED, 1, 1, 1, 1, 600000);
+                         CALL shear-drop("Fluffy", "Fluffy",                    "WhiteFur", 300);
+                         CALL shear-drop("EasterFluffy", "Easter Fluffy",       "WhiteFur", 300);
+                         CALL shear-drop("SpikyMushroom", "Spiky Mushroom",     "HardSpike", 250);
+                         CALL shear-drop("Mouboo", "Mouboo",                    "CottonCloth", 175);
+                         CALL shear-drop("Cobalt", "CobaltPlant",               "CobaltHerb", 700);
+                         CALL shear-drop("Alizarin", "AlizarinPlant",           "AlizarinHerb", 700);
+                         CALL shear-drop("Gamboge", "GambogePlant",             "GambogeHerb", 700);
+                         CALL shear-drop("Mauve", "MauvePlant",                 "MauveHerb", 700);
+                         CALL shear-drop("SilkWorm", "Silkworm",                "SilkCocoon", 300);
                          IF ((name = "Fluffy" || name = "Mouboo") && random(2))
                          THEN { set @value, 1; callfunc "QuestSagathaHappy"; };
                     )
@@ -974,9 +989,9 @@ SPELL hide (target : PC) : "#anwiltyp" =
                 IF (caster <> target) THEN message(caster, "You hid someone!");
           ATEND message(target, "You are no longer hidden.");
 
-#--------------------------------------------------------------------------------
-# Level 2 spells
-#--------------------------------------------------------------------------------
+"--------------------------------------------------------------------------------"
+"Level 2 spells"
+"--------------------------------------------------------------------------------"
 
 SPELL cure-poison (target : PC) : "#anju" =
       LET level = 2
@@ -1030,7 +1045,7 @@ SPELL summon-partner : "#kalzumin" =
           REQUIRE skill(caster, school) > level,
           REQUIRE is_married(caster),
           REQUIRE is_equipped(caster, "WeddingRing"))
-	=> EFFECT CALL adjust_spellpower(school);
+        => EFFECT CALL adjust_spellpower(school);
                   CALL default_effect();
                   IF (failed (partner (caster)))
                   THEN message (caster, "You call out for your partner, but there is no response.");
@@ -1051,9 +1066,9 @@ SPELL summon-partner : "#kalzumin" =
 
 
 
-#--------------------------------------------------------------------------------
-# Level 4 spells
-#--------------------------------------------------------------------------------
+"--------------------------------------------------------------------------------"
+"Level 4 spells"
+"--------------------------------------------------------------------------------"
 
 SPELL shroud : "#anwilvimar" =
       LET level = 4
@@ -1061,7 +1076,7 @@ SPELL shroud : "#anwilvimar" =
       IN (MANA 40, CASTTIME 400,
           REQUIRE skill(caster, MAGIC) > level,
           REQUIRE skill(caster, school) > level)
-	=> EFFECT CALL default_effect();
+        => EFFECT CALL default_effect();
                   shroud(caster, 0x04);
 
 SPELL teleport (destination : STRING) : "#vorp" =
@@ -1072,15 +1087,15 @@ SPELL teleport (destination : STRING) : "#vorp" =
           # CATALYST ["TeleportCrystal"],
           REQUIRE skill(caster, MAGIC) > level,
           REQUIRE skill(caster, school) > level)
-	=> EFFECT CALL default_effect();
+        => EFFECT CALL default_effect();
                   WAIT 1000 + (200000 / (spellpower + 10));
                   sfx(location(caster), SFX_TELEPORT, 200);
                   warp(caster, random_location(anchor(destination)));
                   sfx(caster, SFX_TELEPORT, 200);
 
-#--------------------------------------------------------------------------------
-# Debug keywords
-#--------------------------------------------------------------------------------
+"--------------------------------------------------------------------------------"
+"Debug keywords"
+"--------------------------------------------------------------------------------"
 
 SPELL debug : "debug" =
       REQUIRE DEBUG
@@ -1157,46 +1172,47 @@ PROCEDURE debug_mod(name, delta) =
           ELSE message(caster, "Unknown");
 
 SPELL debug-up1 (name : STRING) : "debug+1" =
-	REQUIRE DEBUG
+        REQUIRE DEBUG
         => EFFECT CALL debug_mod(name, 1);
 
 SPELL debug-down1 (name : STRING) : "debug-1" =
-	REQUIRE DEBUG
+        REQUIRE DEBUG
         => EFFECT CALL debug_mod(name, 0 - 1);
 
 SPELL debug-up16 (name : STRING) : "debug+16" =
-	REQUIRE DEBUG
+        REQUIRE DEBUG
         => EFFECT CALL debug_mod(name, 16);
 
 SPELL debug-down16 (name : STRING) : "debug-16" =
-	REQUIRE DEBUG
+        REQUIRE DEBUG
         => EFFECT CALL debug_mod(name, 0 - 16);
 
 SPELL debug-up256 (name : STRING) : "debug+256" =
-	REQUIRE DEBUG
+        REQUIRE DEBUG
         => EFFECT CALL debug_mod(name, 256);
 
 SPELL debug-down256 (name : STRING) : "debug-256" =
-	REQUIRE DEBUG
+        REQUIRE DEBUG
         => EFFECT CALL debug_mod(name, 0 - 256);
 
 SPELL debug-reset : "debug-reset" =
       REQUIRE DEBUG
-	=> EFFECT set_script_variable(caster, "QUEST_MAGIC", 0);
+        => EFFECT set_script_variable(caster, "QUEST_MAGIC", 0);
                   set_script_variable(caster, "QUEST_MAGIC2", 0);
                   set_script_variable(caster, "MAGIC_FLAGS", 0);
                   set_script_variable(caster, "MAGIC_EXP", 0);
 
 
-#--------------------------------------------------------------------------------
-# Special-purpose quasispells
-#--------------------------------------------------------------------------------
+"--------------------------------------------------------------------------------"
+"Special-purpose quasispells"
+"--------------------------------------------------------------------------------"
 
 CONST MIN_MARRY_LEVEL = 32;
 
 NONMAGIC SILENT SPELL marriage (target : PC) : "marry" =
        (REQUIRE (is_in(location(caster), @("014-1.gat", 28,39) @+ (8, 6)) || is_in(location(caster), @("021-2.gat", 20,25) @+ (4, 4)) ))=>
-       EFFECT IF target == caster  # no valid target or tried to marry self?
+       "no valid target or tried to marry self?"
+       EFFECT IF target == caster
               THEN ABORT;
 
               IF (level(caster) < MIN_MARRY_LEVEL)
@@ -1287,7 +1303,7 @@ NONMAGIC SILENT SPELL marriage (target : PC) : "marry" =
 LOCAL SPELL mouboo-groan : "#g" =
       (MANA 1,
        REQUIRE name_of(caster) = "MOUBOOTAUR") =>
-      	EFFECT FOREACH PC p IN rbox(location(caster), 200) DO
+        EFFECT FOREACH PC p IN rbox(location(caster), 200) DO
                distance = rdistance(location(caster), location(p));
                IF (distance < 15)
                THEN message(p, "The moubootaur's groaning rings in your ears!");
@@ -1299,9 +1315,9 @@ LOCAL SPELL mouboo-groan : "#g" =
 LOCAL SPELL mouboo-smell : "#s" =
       (MANA 1,
        REQUIRE name_of(caster) = "MOUBOOTAUR") =>
-      	EFFECT WAIT 30000;
+        EFFECT WAIT 30000;
                FOREACH PC p IN rbox(location(caster), 30) DO
-               		message(p, "You notice a strange smell all around you.");
+                        message(p, "You notice a strange smell all around you.");
 
 
 CONST E10_FLAG_USED_FREE_WARP_SHIFT = 17
@@ -1468,23 +1484,30 @@ CONST E10_FLAG_USED_FREE_WARP_SHIFT = 17
 #             spawn(rbox(location(caster), 20), caster, 1047, random(random(5)), 1, 100000);
 
 NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
-    (REQUIRE (script_int(caster, "Easter_2010_QuestState") >> 16) & 1 == 1 && (script_int(caster, "Easter_2010_QuestState") >> 7) & 3 == 2) => # Travel only works when you have both helped the doctor at least thrice and have defeated the invader - top level requirement.
-     (  (REQUIRE (count_item(caster, "DarkPetal")) && # Allow unlimited travel with the petal
-        (map_nr(location(caster)) != 5698) # Do not allow if player is in botcheck area
+    "Travel only works when you have both helped the doctor at least thrice and have defeated the invader - top level requirement."
+    "Allow unlimited travel with the petal"
+    "Allow for one free warp home without the petal"
+    "Do not allow if player is in botcheck area"
+    (REQUIRE (script_int(caster, "Easter_2010_QuestState") >> 16) & 1 == 1 && (script_int(caster, "Easter_2010_QuestState") >> 7) & 3 == 2) =>
+     (  (REQUIRE (count_item(caster, "DarkPetal")) &&
+        (map_nr(location(caster)) != 5698)
         )
      => ((REQUIRE rdistance(location(caster), @("028-1.gat", 63, 67)) < 5) =>
-     	         EFFECT sfx(location(caster), SFX_TELEPORT, 200);
+                 EFFECT sfx(location(caster), SFX_TELEPORT, 200);
                         WAIT 8000;
                         { savepoint "009-1", 52, 39; };
                         warp(caster, @("009-1.gat", 55, 37));
                         sfx(location(caster), SFX_TELEPORT, 200);
          |
          (REQUIRE map_nr(location(caster)) != 28) =>
-                 EFFECT inithp = hp(caster); // Store this value.
+                 EFFECT
+                        "Store this value."
+                        inithp = hp(caster);
                         sfx(location(caster), SFX_TELEPORT, 200);
                         IF (map_nr(location(caster)) == 9 || map_nr(location(caster)) == 1 || map_nr(location(caster)) == 21 || map_nr(location(caster)) == 20) THEN WAIT 8000;
                         ELSE WAIT 20000;
-                        IF (hp(caster) < inithp) THEN ABORT; // Cancel teleport if the player took damage during channel time (hacky, but for most purposes should work.)
+                        "Cancel teleport if the player took damage during channel time (hacky, but for most purposes should work.)"
+                        IF (hp(caster) < inithp) THEN ABORT;
                         { savepoint "028-1", 63, 68; };
                         warp(caster, @("028-1.gat", 63, 67));
                         sfx(location(caster), SFX_TELEPORT, 200);
@@ -1496,12 +1519,15 @@ NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
                           { savepoint "009-1", 52, 39; };
                           warp(caster, @("009-1.gat", 55, 37));
                           sfx(location(caster), SFX_TELEPORT, 200);
-       | (REQUIRE map_nr(location(caster)) != 28 && (script_int(caster, "Easter_2010_QuestState") >> 17) & 1 == 0)  # Allow for one free warp home without the petal
-         => EFFECT inithp = hp(caster); // Store this value.
+       | (REQUIRE map_nr(location(caster)) != 28 && (script_int(caster, "Easter_2010_QuestState") >> 17) & 1 == 0)
+         => EFFECT
+                   "Store this value."
+                   inithp = hp(caster);
                    sfx(location(caster), SFX_TELEPORT, 200);
                    IF (map_nr(location(caster)) == 9 || map_nr(location(caster)) == 1 || map_nr(location(caster)) == 21 || map_nr(location(caster)) == 20) THEN WAIT 8000;
                    ELSE WAIT 20000;
-                   IF (hp(caster) < inithp) THEN ABORT; // Cancel teleport if the player took damage during channel time (hacky, but for most purposes should work.)
+                   "Cancel teleport if the player took damage during channel time (hacky, but for most purposes should work.)"
+                   IF (hp(caster) < inithp) THEN ABORT;
                    set_script_variable(caster, "Easter_2010_QuestState", script_int(caster, "Easter_2010_QuestState") | (1 << 17));
                    { savepoint "028-1", 63, 68; };
                    warp(caster, @("028-1.gat", 63, 67));
@@ -1602,9 +1628,9 @@ NONMAGIC SPELL hug5 (target : STRING) : "*hugs" = REQUIRE ((rdistance(location(c
                                                 => EFFECT CALL hug_tree(target);
 
 
-#--------------------------------------------------------------------------------
-# Teleport anchors
-#--------------------------------------------------------------------------------
+"--------------------------------------------------------------------------------"
+"Teleport anchors"
+"--------------------------------------------------------------------------------"
 
 TELEPORT-ANCHOR tulimshar : "tulimshar" = @("001-1.gat", 43, 66) @+ (3, 3);
 TELEPORT-ANCHOR hurnscald : "hurnscald" = @("009-1.gat", 55, 37) @+ (3, 3);
