@@ -1268,7 +1268,7 @@ SPELL debug-reset : "debug-reset" =
 (CONST MIN_MARRY_LEVEL 32);
 
 NONMAGIC SILENT SPELL marriage (target : PC) : "marry" =
-       (REQUIRE (is_in(location(caster), @("014-1.gat", 28,39) @+ (8, 6)) || is_in(location(caster), @("021-2.gat", 20,25) @+ (4, 4)) ))=>
+       (REQUIRE (is_in(location(caster), (@+ (@ "014-1.gat" 28 39) 8 6)) || is_in(location(caster), (@+ (@ "021-2.gat" 20 25) 4 4) ))=>
        "no valid target or tried to marry self?"
        EFFECT IF target == caster
               THEN ABORT;
@@ -1408,7 +1408,7 @@ LOCAL SPELL mouboo-smell : "#s" =
 
 #NONMAGIC SILENT SPELL easter-invader-init : "#i" =
 #    (REQUIRE name_of(caster) == "Xakelbael the Dark") =>
-#      EFFECT warp(caster, @("028-1.gat", 139, 46));
+#      EFFECT warp(caster, (@ "028-1.gat" 139 46));
 #             (SCRIPT "{
 #              gmcommand \"@blvl -255\";
 #              gmcommand \"@blvl 199\";
@@ -1432,7 +1432,7 @@ LOCAL SPELL mouboo-smell : "#s" =
 
 #NONMAGIC SILENT SPELL easter-invader-warp-taunt : "#o" =
 #    (REQUIRE name_of(caster) == "Xakelbael the Dark") =>
-#      EFFECT warp(caster, @("009-1.gat", 48, 35));
+#      EFFECT warp(caster, (@ "009-1.gat" 48 35));
 #             WAIT 80;
 #             sfx(caster, 32, 0);
 #             WAIT 80;
@@ -1469,7 +1469,7 @@ LOCAL SPELL mouboo-smell : "#s" =
 #                    (SCRIPT "{ gmcommand \"@jump\"; }")
 #                    message(p, "A powerful force sends you flying!");
 #                  )
-#             warp(caster, @("028-1.gat", 130, 46));
+#             warp(caster, (@ "028-1.gat" 130 46));
 
 
 #NONMAGIC SILENT SPELL easter-invader-attack-pulse : "#a" =
@@ -1523,10 +1523,10 @@ LOCAL SPELL mouboo-smell : "#s" =
 #    (REQUIRE name_of(caster) == "Xakelbael the Dark") =>
 #      EFFECT IF not (status_option(caster, 4096)) THEN ( sfx(caster, 33, 0);
 #                                                  WAIT 200; );
-#             IF (t == "r") THEN ( warp(caster, @("028-1.gat", 129, 46)); )
-#             ELSE IF (t == "s") THEN ( warp(caster, @("028-1.gat", 69, 96)); )
-#             ELSE IF (t == "c") THEN ( warp(caster, @("028-3.gat", 50, 58)); )
-#             ELSE IF (t == "t") THEN ( warp(caster, @("009-1.gat", 48, 35)); )
+#             IF (t == "r") THEN ( warp(caster, (@ "028-1.gat" 129 46)); )
+#             ELSE IF (t == "s") THEN ( warp(caster, (@ "028-1.gat" 69 96)); )
+#             ELSE IF (t == "c") THEN ( warp(caster, (@ "028-3.gat" 50 58)); )
+#             ELSE IF (t == "t") THEN ( warp(caster, (@ "009-1.gat" 48 35)); )
 #             ELSE (SCRIPT "{ gmcommand \"@jump\"; }");
 
 #NONMAGIC SILENT SPELL easter-invader-taunt-local (s : STRING) : "#l" =
@@ -1552,11 +1552,11 @@ NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
      (  (REQUIRE (count_item(caster, "DarkPetal")) &&
         (map_nr(location(caster)) != 5698)
         )
-     => ((REQUIRE rdistance(location(caster), @("028-1.gat", 63, 67)) < 5) =>
+     => ((REQUIRE rdistance(location(caster), (@ "028-1.gat" 63 67)) < 5) =>
                  EFFECT sfx(location(caster), SFX_TELEPORT, 200);
                         WAIT 8000;
                         (SCRIPT "{ savepoint \"009-1\", 52, 39; }");
-                        warp(caster, @("009-1.gat", 55, 37));
+                        warp(caster, (@ "009-1.gat" 55 37));
                         sfx(location(caster), SFX_TELEPORT, 200);
          |
          (REQUIRE map_nr(location(caster)) != 28) =>
@@ -1569,15 +1569,15 @@ NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
                         "Cancel teleport if the player took damage during channel time (hacky, but for most purposes should work.)"
                         IF (hp(caster) < inithp) THEN ABORT;
                         (SCRIPT "{ savepoint \"028-1\", 63, 68; }");
-                        warp(caster, @("028-1.gat", 63, 67));
+                        warp(caster, (@ "028-1.gat" 63 67));
                         sfx(location(caster), SFX_TELEPORT, 200);
         )
-     | (REQUIRE (rdistance(location(caster), @("028-1.gat", 63, 67)) < 5 )
+     | (REQUIRE (rdistance(location(caster), (@ "028-1.gat" 63 67)) < 5 )
                 => EFFECT set_script_variable(caster, "Easter_2010_QuestState", script_int(caster, "Easter_2010_QuestState") | (1 << 17));
                           sfx(location(caster), SFX_TELEPORT, 200);
                           WAIT 8000;
                           (SCRIPT "{ savepoint \"009-1\", 52, 39; }");
-                          warp(caster, @("009-1.gat", 55, 37));
+                          warp(caster, (@ "009-1.gat" 55 37));
                           sfx(location(caster), SFX_TELEPORT, 200);
        | (REQUIRE map_nr(location(caster)) != 28 && (script_int(caster, "Easter_2010_QuestState") >> 17) & 1 == 0)
          => EFFECT
@@ -1590,7 +1590,7 @@ NONMAGIC SILENT SPELL world-shift : "#alonzialonzo" =
                    IF (hp(caster) < inithp) THEN ABORT;
                    set_script_variable(caster, "Easter_2010_QuestState", script_int(caster, "Easter_2010_QuestState") | (1 << 17));
                    (SCRIPT "{ savepoint \"028-1\", 63, 68; }");
-                   warp(caster, @("028-1.gat", 63, 67));
+                   warp(caster, (@ "028-1.gat" 63 67));
                    sfx(location(caster), SFX_TELEPORT, 200);
        )
      )
@@ -1694,14 +1694,21 @@ NONMAGIC SPELL hug5 (target : STRING) : "*hugs" = REQUIRE ((rdistance(location(c
 "Teleport anchors"
 "--------------------------------------------------------------------------------"
 
-TELEPORT-ANCHOR tulimshar : "tulimshar" = @("001-1.gat", 43, 66) @+ (3, 3);
-TELEPORT-ANCHOR hurnscald : "hurnscald" = @("009-1.gat", 55, 37) @+ (3, 3);
-TELEPORT-ANCHOR nivalis : "nivalis" = @("020-1.gat", 75, 63) @+ (19, 12);
-TELEPORT-ANCHOR wizardhut : "##00" = @("013-1.gat", 41, 92) @+ (3, 3);
-TELEPORT-ANCHOR pachua : "##01" = @("006-1.gat", 22, 101) @+ (3, 3);
-TELEPORT-ANCHOR desert : "##02" = @("005-1.gat", 160, 64) @+ (5, 5);
-TELEPORT-ANCHOR forest : "##03" = @("015-1.gat", 35, 35) @+ (40, 40);
-TELEPORT-ANCHOR snakecave : "##04" = @("011-4.gat", 50, 75) @+ (3, 3);
-TELEPORT-ANCHOR dimondscove : "##05" = @("010-2.gat", 23, 79) @+ (3, 3);
-
-
+(TELEPORT-ANCHOR tulimshar "tulimshar"
+    (@+ (@ "001-1.gat" 43 66) 3 3))
+(TELEPORT-ANCHOR hurnscald "hurnscald"
+    (@+ (@ "009-1.gat" 55 37) 3 3))
+(TELEPORT-ANCHOR nivalis "nivalis"
+    (@+ (@ "020-1.gat" 75 63) 19 12))
+(TELEPORT-ANCHOR wizardhut "##00"
+    (@+ (@ "013-1.gat" 41 92) 3 3))
+(TELEPORT-ANCHOR pachua "##01"
+    (@+ (@ "006-1.gat" 22 101) 3 3))
+(TELEPORT-ANCHOR desert "##02"
+    (@+ (@ "005-1.gat" 160 64) 5 5))
+(TELEPORT-ANCHOR forest "##03"
+    (@+ (@ "015-1.gat" 35 35) 40 40))
+(TELEPORT-ANCHOR snakecave "##04"
+    (@+ (@ "011-4.gat" 50 75) 3 3))
+(TELEPORT-ANCHOR dimondscove "##05"
+    (@+ (@ "010-2.gat" 23 79) 3 3))
