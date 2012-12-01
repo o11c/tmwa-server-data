@@ -1,0 +1,199 @@
+// Warps in hell.
+// Note: max size of an array is 128
+// There are no repeats in a line of the state table,
+// so it is a complete graph.
+// Author: o11c
+
+
+-|script|#hell_warp_config|-1{
+OnInit:
+    setarray $@hell_warp_messages$,
+        "You are in a twisting little maze of passages, all alike.",
+        "You are in a twisting maze of little passages, all alike.",
+        "You are in a little maze of twisting passages, all alike.",
+        "You are in a little maze of twisty passages, all alike.",
+        "You are in a little twisty maze of passages, all alike.",
+        "You are in a maze of twisting little passages, all alike.",
+        "You are in a maze of little twisting passages, all alike.",
+        "You are in a maze of little twisty passages, all alike.",
+        "You are in a maze of twisty little passages, all alike.",
+        "You are in a twisty little maze of passages, all alike.",
+        "You are in a twisty maze of little passages, all alike.";
+    setarray $@hell_warp_table,
+        10, 9,  5,  8,  3,  4,  1,  2,  6,  7,
+        5,  10, 4,  0,  6,  2,  7,  9,  8,  3,
+        6,  1,  3,  10, 0,  ~8, 9,  5,  7,  4,
+        7,  6,  1,  4,  8,  0,  2,  10, 5,  9,
+        1,  7,  10, 5,  9,  3,  8,  6,  0,  2,
+        4,  2,  6,  9,  1,  7,  3,  0,  10, 8,
+        8,  5,  9,  3,  2,  10, 4,  7,  1,  0,
+        9,  3,  0,  2,  5,  6,  10, 8,  4,  1,
+        ~2, 4,  7,  1,  10, 5,  0,  3,  9,  6,
+        3,  0,  8,  6,  7,  1,  5,  4,  2,  10,
+        0,  8,  2,  7,  4,  9,  6,  1,  3,  5;
+    setarray $@hell_warp_back,
+        0,  1,  7,  6,  5,  8,  3,  4,  9,  2,
+        4,  7,  0,  6,  8,  1,  9,  5,  3,  2,
+        4,  5,  6,  2,  7, ~0,  8,  1,  3,  9,
+        1,  3,  9,  5,  7,  4,  2,  8,  6,  0,
+        2,  8,  4,  0,  7,  3,  1,  6,  5,  9,
+        3,  7,  1,  6,  0,  4,  8,  2,  9,  5,
+        9,  2,  3,  1,  0,  6,  7,  5,  4,  8,
+        4,  0,  9,  8,  5,  7,  3,  2,  1,  6,
+        ~5, 6,  7,  8,  1,  9,  3,  4,  2,  0,
+        9,  1,  8,  2,  0,  7,  3,  4,  6,  5,
+        0,  4,  3,  6,  2,  9,  5,  1,  7,  8;
+    end;
+
+OnPCDieEvent:
+    if (BaseLevel < 30)
+        goto L_Lucky;
+    callfunc "CompressSave";
+    set HellSave, @c;
+    set @c, 0;
+    savepoint "000-0.gat", 25, 25;
+    message strcharinfo(0), "[A bell tolls]";
+    end;
+
+L_Lucky:
+    message strcharinfo(0), "You have no idea what you've escaped ...";
+    end;
+}
+
+// uses HellState (persistent player variable)
+// requires @hell_warp (per warp variable)
+// does the warp, prints the message
+function|script|hell_warp_logic|45,0,0{
+    set @i, HellState * 10 + @hell_warp;
+    set @s, $@hell_warp_table[@i];
+    // debug
+    message strcharinfo(0), "begin (" + HellState + ", " + @hell_warp + ") -> " + @s;
+    if (@s < 0)
+        goto L_escape;
+    set @t, $@hell_warp_back[@i];
+    // debug
+    message strcharinfo(0), "reverse (" + HellState + ", " + @s + ") -> " + @t;
+    // debug
+    message strcharinfo(0), "option(" + @s + ", " + @hell_warp + ") -> " + $@hell_warp_table[@s * 10 + @t];
+    warp "000-0.gat", $@hell_warp_x[@t], $@hell_warp_y[@t];
+    set HellState, @s;
+    // debug
+    message strcharinfo(0), "State: " + HellState;
+    // not debug
+    message strcharinfo(0), $@hell_warp_messages$[HellState];
+    goto L_End;
+
+L_escape:
+    set HellState, 0;
+    set @c, HellSave;
+    set HellSave, 0;
+    callfunc "DecompressSaveAndWarp";
+    message strcharinfo(0), "Somehow you've escaped!";
+    goto L_End;
+
+L_End:
+    set @i, 0;
+    set @s, 0;
+    set @t, 0;
+    end;
+}
+
+000-0.gat,24,25,0|script|#hell_warp_0|45,0,0{
+OnTouch:
+    set @hell_warp, 0;
+    callfunc "hell_warp_logic";
+OnInit:
+    set $@hell_warp_x[0], 24;
+    set $@hell_warp_y[0], 25;
+    end;
+}
+
+000-0.gat,30,25,0|script|#hell_warp_1|45,0,0{
+OnTouch:
+    set @hell_warp, 1;
+    callfunc "hell_warp_logic";
+OnInit:
+    set $@hell_warp_x[1], 30;
+    set $@hell_warp_y[1], 25;
+    end;
+}
+
+000-0.gat,25,20,0|script|#hell_warp_2|45,0,0{
+OnTouch:
+    set @hell_warp, 2;
+    callfunc "hell_warp_logic";
+OnInit:
+    set $@hell_warp_x[2], 25;
+    set $@hell_warp_y[2], 20;
+    end;
+}
+
+000-0.gat,28,20,0|script|#hell_warp_3|45,0,0{
+OnTouch:
+    set @hell_warp, 3;
+    callfunc "hell_warp_logic";
+OnInit:
+    set $@hell_warp_x[3], 28;
+    set $@hell_warp_y[3], 20;
+    end;
+}
+
+000-0.gat,22,20,0|script|#hell_warp_4|45,0,0{
+OnTouch:
+    set @hell_warp, 4;
+    callfunc "hell_warp_logic";
+OnInit:
+    set $@hell_warp_x[4], 22;
+    set $@hell_warp_y[4], 20;
+    end;
+}
+
+000-0.gat,25,30,0|script|#hell_warp_5|45,0,0{
+OnTouch:
+    set @hell_warp, 5;
+    callfunc "hell_warp_logic";
+OnInit:
+    set $@hell_warp_x[5], 25;
+    set $@hell_warp_y[5], 30;
+    end;
+}
+
+000-0.gat,28,30,0|script|#hell_warp_6|45,0,0{
+OnTouch:
+    set @hell_warp, 6;
+    callfunc "hell_warp_logic";
+OnInit:
+    set $@hell_warp_x[6], 28;
+    set $@hell_warp_y[6], 30;
+    end;
+}
+
+000-0.gat,22,30,0|script|#hell_warp_7|45,0,0{
+OnTouch:
+    set @hell_warp, 7;
+    callfunc "hell_warp_logic";
+OnInit:
+    set $@hell_warp_x[7], 22;
+    set $@hell_warp_y[7], 30;
+    end;
+}
+
+000-0.gat,26,25,0|script|#hell_warp_8|45,0,0{
+OnTouch:
+    set @hell_warp, 8;
+    callfunc "hell_warp_logic";
+OnInit:
+    set $@hell_warp_x[8], 26;
+    set $@hell_warp_y[8], 25;
+    end;
+}
+
+000-0.gat,20,25,0|script|#hell_warp_9|45,0,0{
+OnTouch:
+    set @hell_warp, 9;
+    callfunc "hell_warp_logic";
+OnInit:
+    set $@hell_warp_x[9], 20;
+    set $@hell_warp_y[9], 25;
+    end;
+}

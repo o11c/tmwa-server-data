@@ -1,0 +1,7 @@
+// Death
+000-0.gat,25,25,0|script|Death|219,{
+    mes "[Death]";
+    mes "I can't believe they made me an NPC";
+    mes "End of the line, kid. This is it.";
+    close;
+}

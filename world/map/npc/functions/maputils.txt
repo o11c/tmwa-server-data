@@ -1,0 +1,134 @@
+// Utilities for compressing/decompressing a map location
+// into a single 32-bit integer.
+//
+// Author: o11c
+
+// This only works for maps of the form: ###-#.gat,
+// where the major number is in [0, 255] and the minor number is in [0, 9].
+// Much magic is done to make leading zeroes work properly
+// If these functions fail, they output all zeroes.
+//
+// A player must be attached.
+
+// input: @m$, @x, @y - uncompressed position
+// output: @c - compressed position
+function|script|CompressPos|-1,{
+    // clear this now to simplify error return
+    set @c, 0;
+
+    // uses atoi, so ignores trailing "garbage" and ignores leading 0s.
+    set @m, @m$;
+
+    if (@m > 0xff) goto L_Return;
+    if (@m < 0) goto L_Return;
+    if (@x > 0x3ff) goto L_Return;
+    if (@x < 0) goto L_Return;
+    if (@y > 0x3ff) goto L_Return;
+    if (@y < 0) goto L_Return;
+
+    set @p$, @m;
+    if (@m < 10)
+        set @p$, "0" + @p$;
+    if (@m < 100)
+        set @p$, "0" + @p$;
+
+    set @d, 0;
+L_Loop:
+    if (@m$ == (@p$ + "-" + @d + ".gat"))
+        goto L_Success;
+    set @d, @d + 1;
+    if (@d <= 9)
+        goto L_Loop;
+    goto L_Return;
+
+L_Success:
+    set @c, ((@m << 24) | (@d << 20) | (@x << 10) | (@y << 0));
+    goto L_Return;
+
+L_Return:
+    set @p$, "";
+    set @d, 0;
+    set @m$, "";
+    set @x, 0;
+    set @y, 0;
+    return;
+}
+
+// input: @c - compressed position
+// output: @m$, @x, @y - decompressed position
+function|script|DecompressPos|-1,{
+    set @m, (@c >> 24) & 0xff;
+    set @d, (@c >> 20) & 0xf;
+    set @x, (@c >> 10) & 0x3ff;
+    set @y, (@c >> 0) & 0x3ff;
+    set @m$, @m + "-" + @d + ".gat";
+    if (@m < 10)
+        set @m$, "0" + @m$;
+    if (@m < 100)
+        set @m$, "0" + @m$;
+
+    set @d, 0;
+    set @m, 0;
+    set @c, 0;
+    return;
+}
+
+// input: none
+// also reads attached player's respawn position
+// output: @c - compressed position
+function|script|CompressSave|-1,{
+    // This will need to change when the script engine is made type-safe.
+    set @m$, getsavepoint(0);
+    set @x, getsavepoint(1);
+    set @y, getsavepoint(2);
+    callfunc "CompressPos";
+    return;
+}
+
+// input: @c - compressed position
+// output: none
+// side-effect: change player's save position
+function|script|DecompressSave|-1,{
+    callfunc "DecompressPos";
+    savepoint @m$, @x, @y;
+    set @m$, "";
+    set @x, 0;
+    set @y, 0;
+    return;
+}
+
+// input: none
+// also reads attached player's current position
+// output: @c - compressed position
+function|script|CompressCurrentPos|-1,{
+    set @m$, getmap();
+    set @x, getx();
+    set @y, gety();
+    callfunc "CompressPos";
+    return;
+}
+
+// input: @c - compressed position
+// output: none
+// side-effect: warp player
+function|script|DecompressAndWarp|-1,{
+    callfunc "DecompressPos";
+    warp @m$, @x, @y;
+    set @m$, "";
+    set @x, 0;
+    set @y, 0;
+    return;
+}
+
+// input: @c - compressed position
+// output: none
+// side-effect: overwrite save position and warp player
+function|script|DecompressSaveAndWarp|-1,{
+    callfunc "DecompressPos";
+    warp @m$, @x, @y;
+    savepoint @m$, @x, @y;
+    set @m$, "";
+    set @x, 0;
+    set @y, 0;
+    return;
+}
