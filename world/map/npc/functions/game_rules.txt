@@ -44,16 +44,20 @@ L_German:
     goto L_End;
 
 L_Dutch:
-    mes "ATTENTION: this translation is outdated. Please refer to the English version and submit a patch.";
+    // yay, someone translated the "this translation is outdated" message
+    // mes "Let op: deze vertaling is (mogelijk) verouderd. Lees daarom ook de vengelse versie door.";
+
     mes "Spelers die de volgende regels overtreden lopen het risico gebanned te worden (oplopend tot een permanente ban) of een reset te krijgen:";
+
     mes "1. Misbruik geen andere spelers (vloeken, groftaal gebruik, enzovoort tegen een bepaalde persoon of personen)";
-    mes "2. Geen 'bots' (geautomatiseerde speler) en botten betekend ELKE activiteit terwijl je van je toetsenboord weg bent";
+    mes "2. Geen 'bots' (geautomatiseerde speler). inclusief ELKE activiteit terwijl je van je toetsenboord weg bent en het geautomatiseerd volgen van personen of wezens";
     mes "3. Verboden te 'spammen' (inclusief het spammen van ruilaanvragen)";
     mes "4. Verboden te bedelen";
     mes "5. Spreek Engels op de publieke chat";
     mes "6. Behandel andere zoals ook jij behandeld wilt worden";
     next;
-    mes "Botten word bepaald door te praten tegen spelers die aan het bewegen en/of aanvallen zijn.";
+    mes "Botten wordt bepaald door te praten tegen spelers die aan het bewegen en/of aanvallen zijn.";
+    mes "Geautomatiseerd volgen wordt bepaald door observatie.";
     next;
     goto L_End;
 
